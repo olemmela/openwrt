@@ -1,5 +1,17 @@
+PART_NAME=firmware
+
 platform_check_image() {
 	local diskdev partdev diff
+	local firmware_mtd=$(find_mtd_part firmware)
+	local image_magic="$(get_magic_long "$1")"
+
+	if [ -n "$firmware_mtd" ] && [ "$image_magic" != "00000000" ]; then
+		REQUIRE_IMAGE_METADATA=1
+		if ! $(fwtool_check_image $@); then
+			return 1
+		fi
+		return 0
+	fi
 
 	export_bootdevice && export_partdevice diskdev 0 || {
 		echo "Unable to determine upgrade device"
@@ -35,7 +47,7 @@ platform_copy_config() {
 	fi
 }
 
-platform_do_upgrade() {
+platform_do_upgrade_mmc() {
 	local diskdev partdev diff
 
 	export_bootdevice && export_partdevice diskdev 0 || {
@@ -85,4 +97,20 @@ platform_do_upgrade() {
 	#copy partition uuid
 	echo "Writing new UUID to /dev/$diskdev..."
 	get_image "$@" | dd of="/dev/$diskdev" bs=1 skip=440 count=4 seek=440 conv=fsync
+}
+
+platform_do_upgrade() {
+	local board=$(board_name)
+	local image_magic="$(get_magic_long "$1")"
+
+	if [ "$image_magic" != "00000000" ]; then
+		case "$board" in
+		pine64,pine64-lts)
+			default_do_upgrade "$1"
+			;;
+		esac
+	else
+		platform_do_upgrade_mmc "$1"
+	fi
+
 }
