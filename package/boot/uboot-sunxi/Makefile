@@ -230,6 +230,14 @@ define U-Boot/nanopi_neo2
   UENV:=a64
 endef
 
+define U-Boot/pine64-lts
+  BUILD_SUBTARGET:=cortexa53
+  NAME:=Pine64 LTS
+  BUILD_DEVICES:=pine64_pine64-lts
+  DEPENDS:=+PACKAGE_u-boot-pine64_lts:arm-trusted-firmware-sunxi
+  UENV:=a64
+endef
+
 define U-Boot/pine64_plus
   BUILD_SUBTARGET:=cortexa53
   NAME:=Pine64 Plus A64
@@ -312,6 +320,7 @@ UBOOT_TARGETS := \
 	orangepi_2 \
 	orangepi_pc2 \
 	pangolin \
+	pine64-lts \
 	pine64_plus \
 	sopine_baseboard \
 	orangepi_zero_plus

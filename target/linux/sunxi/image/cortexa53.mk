@@ -56,6 +56,20 @@ define Device/olimex-a64_olinuxino-emmc
 endef
 TARGET_DEVICES += olimex-a64_olinuxino-emmc
 
+define Device/pine64_pine64-lts
+  DEVICE_VENDOR := Pine64
+  DEVICE_MODEL := Pine64 LTS
+  FILESYSTEMS := squashfs
+  IMAGE_SIZE := 15360k
+  IMAGES += sysupgrade.bin
+  IMAGE/sysupgrade.bin := append-kernel | append-rootfs | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
+  ARTIFACTS := u-boot-with-spl.bin
+  ARTIFACT/u-boot-with-spl.bin := sunxi-uboot | check-size 896k
+  $(Device/sun50i-a64)
+endef
+
+TARGET_DEVICES += pine64_pine64-lts
+
 define Device/pine64_pine64-plus
   DEVICE_VENDOR := Pine64
   DEVICE_MODEL := Pine64+
