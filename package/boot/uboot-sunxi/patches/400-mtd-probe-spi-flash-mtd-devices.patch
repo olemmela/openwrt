@@ -1,0 +1,31 @@
+From d25d13b25c8d4b6f54f17b5a060468df22230263 Mon Sep 17 00:00:00 2001
+From: Oskari Lemmela <oskari@lemmela.net>
+Date: Tue, 6 Aug 2019 15:12:19 +0300
+Subject: [PATCH] mtd: probe spi flash mtd devices
+
+probe UCLASS_SPI_FLASH devices during mtdparts init
+
+Signed-off-by: Oskari Lemmela <oskari@lemmela.net>
+---
+ drivers/mtd/mtd_uboot.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/mtd/mtd_uboot.c b/drivers/mtd/mtd_uboot.c
+index db20a6b0b2..fabf222a05 100644
+--- a/drivers/mtd/mtd_uboot.c
++++ b/drivers/mtd/mtd_uboot.c
+@@ -111,6 +111,11 @@ static void mtd_probe_uclass_mtd_devs(void)
+ 		mtd_probe(dev);
+ 		idx++;
+ 	}
++	idx = 0;
++	while (!uclass_find_device(UCLASS_SPI_FLASH, idx, &dev) && dev) {
++		mtd_probe(dev);
++		idx++;
++	}
+ }
+ #else
+ static void mtd_probe_uclass_mtd_devs(void) { }
+-- 
+2.25.1
+
