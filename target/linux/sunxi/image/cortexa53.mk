@@ -8,8 +8,9 @@
 
 define Device/sun50i
   SUNXI_DTS_DIR := allwinner/
+  KERNEL_LOADADDR:=0x40080000
   KERNEL_NAME := Image
-  KERNEL := kernel-bin
+  KERNEL := kernel-bin | lzma | fit lzma $$(DTS_DIR)/$$(SUNXI_DTS).dtb
 endef
 
 define Device/sun50i-h5
