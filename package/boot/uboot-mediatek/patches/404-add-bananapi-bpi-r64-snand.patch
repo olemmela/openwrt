@@ -1,0 +1,34 @@
+--- a/arch/arm/dts/mt7622-bananapi-bpi-r64.dts	2021-03-12 10:00:48.248746068 +0200
++++ b/arch/arm/dts/mt7622-bananapi-bpi-r64.dts	2021-03-12 10:02:26.993953897 +0200
+@@ -19,7 +19,7 @@
+ 	};
+ 
+ 	aliases {
+-		spi0 = &snfi;
++		spi0 = &snand;
+ 		ethernet0 = &eth;
+ 	};
+ 
+@@ -205,17 +205,11 @@
+ 	};
+ };
+ 
+-&snfi {
+-	pinctrl-names = "default", "snfi";
+-	pinctrl-0 = <&snor_pins>;
+-	pinctrl-1 = <&snfi_pins>;
+-	status = "okay";
+-
+-	spi-flash@0{
+-		compatible = "jedec,spi-nor";
+-		reg = <0>;
+-		u-boot,dm-pre-reloc;
+-	};
++&snand {
++       pinctrl-names = "default";
++       pinctrl-0 = <&snfi_pins>;
++       status = "okay";
++       quad-spi;
+ };
+ 
+ &uart0 {
