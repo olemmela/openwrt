@@ -271,6 +271,37 @@
 			};
 		};
 	};
+	poe_ctrl@2 {
+		compatible = "mikrotik,poe-v3";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <2>;
+		spi-max-frequency = <2100000>;
+
+		port@2 {
+			compatible = "mikrotik,poeport";
+			reg = <4>;
+			label = "lan2";
+		};
+
+		port@3 {
+			compatible = "mikrotik,poeport";
+			reg = <3>;
+			label = "lan3";
+		};
+
+		port@4 {
+			compatible = "mikrotik,poeport";
+			reg = <2>;
+			label = "lan4";
+		};
+
+		port@5 {
+			compatible = "mikrotik,poeport";
+			reg = <1>;
+			label = "lan5";
+		};
+	};
 };
 
 &usb0 {
