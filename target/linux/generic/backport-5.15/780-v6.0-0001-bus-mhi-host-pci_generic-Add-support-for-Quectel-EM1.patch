@@ -1,0 +1,30 @@
+From 178329d4d635fb1848cc7ca1803dee5a634cde0d Mon Sep 17 00:00:00 2001
+From: Yonglin Tan <yonglin.tan@outlook.com>
+Date: Mon, 16 May 2022 14:38:29 +0800
+Subject: [PATCH] bus: mhi: host: pci_generic: Add support for Quectel
+ EM120 FCCL modem
+
+The product's enumeration align with previous Quectel EM120R-GL, so the
+EM120 FCCL would use the same config as Quectel EM120R-GL.
+
+Signed-off-by: Yonglin Tan <yonglin.tan@outlook.com>
+Reviewed-by: Manivannan Sadhasivam <mani@kernel.org>
+Reviewed-by: Loic Poulain <loic.poulain@linaro.org>
+Link: https://lore.kernel.org/r/MEYP282MB2374837FFCB18B12BFDEDE80FDCF9@MEYP282MB2374.AUSP282.PROD.OUTLOOK.COM
+[mani: added pci_generic prefix to subject and aligned the commit message]
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/bus/mhi/host/pci_generic.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/drivers/bus/mhi/host/pci_generic.c
++++ b/drivers/bus/mhi/host/pci_generic.c
+@@ -557,6 +557,8 @@ static const struct pci_device_id mhi_pc
+ 		.driver_data = (kernel_ulong_t) &mhi_quectel_em1xx_info },
+ 	{ PCI_DEVICE(0x1eac, 0x1002), /* EM160R-GL (sdx24) */
+ 		.driver_data = (kernel_ulong_t) &mhi_quectel_em1xx_info },
++	{ PCI_DEVICE(0x1eac, 0x2001), /* EM120R-GL for FCCL (sdx24) */
++		.driver_data = (kernel_ulong_t) &mhi_quectel_em1xx_info },
+ 	/* T99W175 (sdx55), Both for eSIM and Non-eSIM */
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0ab),
+ 		.driver_data = (kernel_ulong_t) &mhi_foxconn_sdx55_info },

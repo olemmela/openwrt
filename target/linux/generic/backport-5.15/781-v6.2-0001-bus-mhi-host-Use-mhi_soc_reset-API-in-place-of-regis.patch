@@ -1,0 +1,34 @@
+From 46db0ba12be6cfd043df1d09b5831cb84ce2307f Mon Sep 17 00:00:00 2001
+From: Qiang Yu <quic_qianyu@quicinc.com>
+Date: Mon, 10 Oct 2022 12:32:04 +0800
+Subject: [PATCH] bus: mhi: host: Use mhi_soc_reset() API in place of
+ register write
+
+Currently, a direct register write is used when ramdump collection
+in panic path occurs. Replace that with new mhi_soc_reset() API
+such that a controller defined reset() function is exercised if
+one is present and the regular SOC reset is done if it is not.
+
+Signed-off-by: Qiang Yu <quic_qianyu@quicinc.com>
+Reviewed-by: Loic Poulain <loic.poulain@linaro.org>
+Reviewed-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Reviewed-by: Manivannan Sadhasivam <mani@kernel.org>
+Link: https://lore.kernel.org/r/1665376324-34258-1-git-send-email-quic_qianyu@quicinc.com
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/bus/mhi/host/boot.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+--- a/drivers/bus/mhi/host/boot.c
++++ b/drivers/bus/mhi/host/boot.c
+@@ -118,9 +118,7 @@ static int __mhi_download_rddm_in_panic(
+ 			/* Hardware reset so force device to enter RDDM */
+ 			dev_dbg(dev,
+ 				"Did not enter RDDM, do a host req reset\n");
+-			mhi_write_reg(mhi_cntrl, mhi_cntrl->regs,
+-				      MHI_SOC_RESET_REQ_OFFSET,
+-				      MHI_SOC_RESET_REQ);
++			mhi_soc_reset(mhi_cntrl);
+ 			udelay(delayus);
+ 		}
+ 

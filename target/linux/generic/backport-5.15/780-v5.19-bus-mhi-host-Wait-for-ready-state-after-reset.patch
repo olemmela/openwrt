@@ -1,0 +1,49 @@
+From 36e5505dfb42e86b25ded0a023dace6cff875cc3 Mon Sep 17 00:00:00 2001
+From: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Date: Mon, 18 Apr 2022 11:22:42 -0600
+Subject: [PATCH] bus: mhi: host: Wait for ready state after reset
+
+After the device has signaled the end of reset by clearing the reset bit,
+it will automatically reinit MHI and the internal device structures.  Once
+That is done, the device will signal it has entered the ready state.
+
+Signaling the ready state involves sending an interrupt (MSI) to the host
+which might cause IOMMU faults if it occurs at the wrong time.
+
+If the controller is being powered down, and possibly removed, then the
+reset flow would only wait for the end of reset.  At which point, the host
+and device would start a race.  The host may complete its reset work, and
+remove the interrupt handler, which would cause the interrupt to be
+disabled in the IOMMU.  If that occurs before the device signals the ready
+state, then the IOMMU will fault since it blocked an interrupt.  While
+harmless, the fault would appear like a serious issue has occurred so let's
+silence it by making sure the device hits the ready state before the host
+completes its reset processing.
+
+Signed-off-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Reviewed-by: Hemant Kumar <quic_hemantk@quicinc.com>
+Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+Link: https://lore.kernel.org/r/1650302562-30964-1-git-send-email-quic_jhugo@quicinc.com
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/bus/mhi/host/pm.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+--- a/drivers/bus/mhi/host/pm.c
++++ b/drivers/bus/mhi/host/pm.c
+@@ -484,6 +484,15 @@ static void mhi_pm_disable_transition(st
+ 		 * hence re-program it
+ 		 */
+ 		mhi_write_reg(mhi_cntrl, mhi_cntrl->bhi, BHI_INTVEC, 0);
++
++		if (!MHI_IN_PBL(mhi_get_exec_env(mhi_cntrl))) {
++			/* wait for ready to be set */
++			ret = mhi_poll_reg_field(mhi_cntrl, mhi_cntrl->regs,
++						 MHISTATUS,
++						 MHISTATUS_READY_MASK, 1, 25000);
++			if (ret)
++				dev_err(dev, "Device failed to enter READY state\n");
++		}
+ 	}
+ 
+ 	dev_dbg(dev,

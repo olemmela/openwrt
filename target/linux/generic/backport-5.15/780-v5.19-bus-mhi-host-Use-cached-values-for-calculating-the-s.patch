@@ -1,0 +1,84 @@
+From e565d3efd894f0fba844cf3eafd098d66c266333 Mon Sep 17 00:00:00 2001
+From: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Date: Wed, 13 Apr 2022 10:41:53 -0600
+Subject: [PATCH] bus: mhi: host: Use cached values for calculating the
+ shared write pointer
+
+mhi_recycle_ev_ring() computes the shared write pointer for the ring
+(ctxt_wp) using a read/modify/write pattern where the ctxt_wp value in the
+shared memory is read, incremented, and written back.  There are no checks
+on the read value, it is assumed that it is kept in sync with the locally
+cached value.  Per the MHI spec, this is correct.  The device should only
+read ctxt_wp, never write it.
+
+However, there are devices in the wild that violate the spec, and can
+update the ctxt_wp in a specific scenario.  This can cause corruption, and
+violate the above assumption that the ctxt_wp is in sync with the cached
+value.
+
+This can occur when the device has loaded firmware from the host, and is
+transitioning from the SBL EE to the AMSS EE.  As part of shutting down
+SBL, the SBL flushes it's local MHI context to the shared memory since
+the local context will not persist across an EE change.  In the case of
+the event ring, SBL will flush its entire context, not just the parts that
+it is allowed to update.  This means SBL will write to ctxt_wp, and
+possibly corrupt it.
+
+An example:
+
+Host				Device
+----				---
+Update ctxt_wp to 0x1f0
+				SBL observes 0x1f0
+Update ctxt_wp to 0x0
+				Starts transition to AMSS EE
+				Context flush, writes 0x1f0 to ctxt_wp
+Update ctxt_wp to 0x200
+Update ctxt_wp to 0x210
+				AMSS observes 0x210
+				0x210 exceeds ring size
+				AMSS signals syserr
+
+The reason the ctxt_wp goes off the end of the ring is that the rollover
+check is only performed on the cached wp, which is out of sync with
+ctxt_wp.
+
+Since the host is the authority of the value of ctxt_wp per the MHI spec,
+we can fix this issue by not reading ctxt_wp from the shared memory, and
+instead compute it based on the cached value.  If SBL corrupts ctxt_wp,
+the host won't observe it, and will correct the value at some point later.
+
+Signed-off-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Reviewed-by: Hemant Kumar <quic_hemantk@quicinc.com>
+Reviewed-by: Bhaumik Bhatt <quic_bbhatt@quicinc.com>
+Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+Link: https://lore.kernel.org/r/1649868113-18826-1-git-send-email-quic_jhugo@quicinc.com
+[mani: used the quicinc domain for Hemant and Bhaumik]
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/bus/mhi/host/main.c | 9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
+
+--- a/drivers/bus/mhi/host/main.c
++++ b/drivers/bus/mhi/host/main.c
+@@ -534,18 +534,13 @@ irqreturn_t mhi_intvec_handler(int irq_n
+ static void mhi_recycle_ev_ring_element(struct mhi_controller *mhi_cntrl,
+ 					struct mhi_ring *ring)
+ {
+-	dma_addr_t ctxt_wp;
+-
+ 	/* Update the WP */
+ 	ring->wp += ring->el_size;
+-	ctxt_wp = le64_to_cpu(*ring->ctxt_wp) + ring->el_size;
+ 
+-	if (ring->wp >= (ring->base + ring->len)) {
++	if (ring->wp >= (ring->base + ring->len))
+ 		ring->wp = ring->base;
+-		ctxt_wp = ring->iommu_base;
+-	}
+ 
+-	*ring->ctxt_wp = cpu_to_le64(ctxt_wp);
++	*ring->ctxt_wp = cpu_to_le64(ring->iommu_base + (ring->wp - ring->base));
+ 
+ 	/* Update the RP */
+ 	ring->rp += ring->el_size;

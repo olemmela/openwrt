@@ -1,0 +1,52 @@
+From 89ad19bea64948685da01035af8706e587cf5d25 Mon Sep 17 00:00:00 2001
+From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+Date: Mon, 11 Apr 2022 19:04:28 +0530
+Subject: [PATCH] bus: mhi: host: pci_generic: Sort mhi_pci_id_table
+ based on the PID
+
+Sorting this way helps in identifying the products of vendors. There is no
+sorting required for VID and the new VID should be added as the last entry.
+
+Let's also add a note clarifying this.
+
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+Reviewed-by: Daniele Palmas <dnlplm@gmail.com>
+Link: https://lore.kernel.org/r/20220411133428.42165-1-manivannan.sadhasivam@linaro.org
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/bus/mhi/host/pci_generic.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+--- a/drivers/bus/mhi/host/pci_generic.c
++++ b/drivers/bus/mhi/host/pci_generic.c
+@@ -519,7 +519,10 @@ static const struct mhi_pci_dev_info mhi
+ 	.mru_default = 32768,
+ };
+ 
++/* Keep the list sorted based on the PID. New VID should be added as the last entry */
+ static const struct pci_device_id mhi_pci_id_table[] = {
++	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0304),
++		.driver_data = (kernel_ulong_t) &mhi_qcom_sdx24_info },
+ 	/* EM919x (sdx55), use the same vid:pid as qcom-sdx55m */
+ 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0306, 0x18d7, 0x0200),
+ 		.driver_data = (kernel_ulong_t) &mhi_sierra_em919x_info },
+@@ -528,8 +531,8 @@ static const struct pci_device_id mhi_pc
+ 		.driver_data = (kernel_ulong_t) &mhi_telit_fn980_hw_v1_info },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0306),
+ 		.driver_data = (kernel_ulong_t) &mhi_qcom_sdx55_info },
+-	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0304),
+-		.driver_data = (kernel_ulong_t) &mhi_qcom_sdx24_info },
++	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0308),
++		.driver_data = (kernel_ulong_t) &mhi_qcom_sdx65_info },
+ 	/* Telit FN990 */
+ 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0308, 0x1c5d, 0x2010),
+ 		.driver_data = (kernel_ulong_t) &mhi_telit_fn990_info },
+@@ -537,8 +540,6 @@ static const struct pci_device_id mhi_pc
+ 		.driver_data = (kernel_ulong_t) &mhi_quectel_em1xx_info },
+ 	{ PCI_DEVICE(0x1eac, 0x1002), /* EM160R-GL (sdx24) */
+ 		.driver_data = (kernel_ulong_t) &mhi_quectel_em1xx_info },
+-	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0308),
+-		.driver_data = (kernel_ulong_t) &mhi_qcom_sdx65_info },
+ 	/* T99W175 (sdx55), Both for eSIM and Non-eSIM */
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0ab),
+ 		.driver_data = (kernel_ulong_t) &mhi_foxconn_sdx55_info },

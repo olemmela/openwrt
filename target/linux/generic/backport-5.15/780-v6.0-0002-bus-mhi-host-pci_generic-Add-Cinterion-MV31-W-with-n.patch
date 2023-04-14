@@ -1,0 +1,30 @@
+From b7ce716254315dffcfce60e149ddd022c8a60345 Mon Sep 17 00:00:00 2001
+From: Slark Xiao <slark_xiao@163.com>
+Date: Wed, 22 Jun 2022 11:25:44 +0800
+Subject: [PATCH] bus: mhi: host: pci_generic: Add Cinterion MV31-W
+ with new baseline
+
+Cinterion MV31-W modem with a new baseline (firmware) is sold as a separate
+product with different device ID. So add support for the same reusing the
+config.
+
+Signed-off-by: Slark Xiao <slark_xiao@163.com>
+Reviewed-by: Manivannan Sadhasivam <mani@kernel.org>
+Link: https://lore.kernel.org/r/20220622032544.17713-1-slark_xiao@163.com
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/bus/mhi/host/pci_generic.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+--- a/drivers/bus/mhi/host/pci_generic.c
++++ b/drivers/bus/mhi/host/pci_generic.c
+@@ -580,6 +580,9 @@ static const struct pci_device_id mhi_pc
+ 	/* MV31-W (Cinterion) */
+ 	{ PCI_DEVICE(0x1269, 0x00b3),
+ 		.driver_data = (kernel_ulong_t) &mhi_mv31_info },
++	/* MV31-W (Cinterion), based on new baseline */
++	{ PCI_DEVICE(0x1269, 0x00b4),
++		.driver_data = (kernel_ulong_t) &mhi_mv31_info },
+ 	/* MV32-WA (Cinterion) */
+ 	{ PCI_DEVICE(0x1269, 0x00ba),
+ 		.driver_data = (kernel_ulong_t) &mhi_mv32_info },

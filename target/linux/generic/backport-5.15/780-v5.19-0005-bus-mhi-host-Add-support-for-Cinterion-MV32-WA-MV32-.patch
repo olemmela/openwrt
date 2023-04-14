@@ -1,0 +1,87 @@
+From 17e6ff4937be04b986558d752802bde48198e9c3 Mon Sep 17 00:00:00 2001
+From: Slark Xiao <slark_xiao@163.com>
+Date: Thu, 21 Apr 2022 17:21:41 +0800
+Subject: [PATCH] bus: mhi: host: Add support for Cinterion
+ MV32-WA/MV32-WB
+
+MV32-WA is designed based on Qualcomm SDX62, and
+MV32-WB is designed based on QUalcomm SDX65. Both
+products' enumeration would align with previous
+product MV31-W.So we merge MV31 and MV32 to MV3X
+for some common settings.
+
+Signed-off-by: Slark Xiao <slark_xiao@163.com>
+Reviewed-by: Loic Poulain <loic.poulain@linaro.org>
+Reviewed-by: Manivannan Sadhasivam <mani@kernel.org>
+Link: https://lore.kernel.org/r/20220421092141.3984-1-slark_xiao@163.com
+[mani: removed the fixes tag that's not needed]
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/bus/mhi/host/pci_generic.c | 30 ++++++++++++++++++++++--------
+ 1 file changed, 22 insertions(+), 8 deletions(-)
+
+--- a/drivers/bus/mhi/host/pci_generic.c
++++ b/drivers/bus/mhi/host/pci_generic.c
+@@ -371,7 +371,7 @@ static const struct mhi_pci_dev_info mhi
+ 	.sideband_wake = false,
+ };
+ 
+-static const struct mhi_channel_config mhi_mv31_channels[] = {
++static const struct mhi_channel_config mhi_mv3x_channels[] = {
+ 	MHI_CHANNEL_CONFIG_UL(0, "LOOPBACK", 64, 0),
+ 	MHI_CHANNEL_CONFIG_DL(1, "LOOPBACK", 64, 0),
+ 	/* MBIM Control Channel */
+@@ -382,25 +382,33 @@ static const struct mhi_channel_config m
+ 	MHI_CHANNEL_CONFIG_HW_DL(101, "IP_HW0_MBIM", 512, 3),
+ };
+ 
+-static struct mhi_event_config mhi_mv31_events[] = {
++static struct mhi_event_config mhi_mv3x_events[] = {
+ 	MHI_EVENT_CONFIG_CTRL(0, 256),
+ 	MHI_EVENT_CONFIG_DATA(1, 256),
+ 	MHI_EVENT_CONFIG_HW_DATA(2, 1024, 100),
+ 	MHI_EVENT_CONFIG_HW_DATA(3, 1024, 101),
+ };
+ 
+-static const struct mhi_controller_config modem_mv31_config = {
++static const struct mhi_controller_config modem_mv3x_config = {
+ 	.max_channels = 128,
+ 	.timeout_ms = 20000,
+-	.num_channels = ARRAY_SIZE(mhi_mv31_channels),
+-	.ch_cfg = mhi_mv31_channels,
+-	.num_events = ARRAY_SIZE(mhi_mv31_events),
+-	.event_cfg = mhi_mv31_events,
++	.num_channels = ARRAY_SIZE(mhi_mv3x_channels),
++	.ch_cfg = mhi_mv3x_channels,
++	.num_events = ARRAY_SIZE(mhi_mv3x_events),
++	.event_cfg = mhi_mv3x_events,
+ };
+ 
+ static const struct mhi_pci_dev_info mhi_mv31_info = {
+ 	.name = "cinterion-mv31",
+-	.config = &modem_mv31_config,
++	.config = &modem_mv3x_config,
++	.bar_num = MHI_PCI_DEFAULT_BAR_NUM,
++	.dma_data_width = 32,
++	.mru_default = 32768,
++};
++
++static const struct mhi_pci_dev_info mhi_mv32_info = {
++	.name = "cinterion-mv32",
++	.config = &modem_mv3x_config,
+ 	.bar_num = MHI_PCI_DEFAULT_BAR_NUM,
+ 	.dma_data_width = 32,
+ 	.mru_default = 32768,
+@@ -555,6 +563,12 @@ static const struct pci_device_id mhi_pc
+ 	/* MV31-W (Cinterion) */
+ 	{ PCI_DEVICE(0x1269, 0x00b3),
+ 		.driver_data = (kernel_ulong_t) &mhi_mv31_info },
++	/* MV32-WA (Cinterion) */
++	{ PCI_DEVICE(0x1269, 0x00ba),
++		.driver_data = (kernel_ulong_t) &mhi_mv32_info },
++	/* MV32-WB (Cinterion) */
++	{ PCI_DEVICE(0x1269, 0x00bb),
++		.driver_data = (kernel_ulong_t) &mhi_mv32_info },
+ 	{  }
+ };
+ MODULE_DEVICE_TABLE(pci, mhi_pci_id_table);

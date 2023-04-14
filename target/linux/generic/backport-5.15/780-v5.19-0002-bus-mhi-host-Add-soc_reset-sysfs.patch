@@ -1,0 +1,79 @@
+From 95c33ae41b822c37dc841cf80ca388fea376e36d Mon Sep 17 00:00:00 2001
+From: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Date: Mon, 18 Apr 2022 11:18:47 -0600
+Subject: [PATCH] bus: mhi: host: Add soc_reset sysfs
+
+The MHI bus supports a standardized hardware reset, which is known as the
+"SoC Reset".  This reset is similar to the reset sysfs for PCI devices -
+a hardware mechanism to reset the state back to square one.
+
+The MHI SoC Reset is described in the spec as a reset of last resort.  If
+some unrecoverable error has occurred where other resets have failed, SoC
+Reset is the "big hammer" that ungracefully resets the device.  This is
+effectivly the same as yanking the power on the device, and reapplying it.
+However, depending on the nature of the particular issue, the underlying
+transport link may remain active and configured.  If the link remains up,
+the device will flag a MHI system error early in the boot process after
+the reset is executed, which allows the MHI bus to process a fatal error
+event, and clean up appropiately.
+
+While the SoC Reset is generally intended as a means of recovery when all
+else has failed, it can be useful in non-error scenarios.  For example,
+if the device loads firmware from the host filesystem, the device may need
+to be fully rebooted inorder to pick up the new firmware.  In this
+scenario, the system administrator may use the soc_reset sysfs to cause
+the device to pick up the new firmware that the admin placed on the
+filesystem.
+
+Signed-off-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Reviewed-by: Bhaumik Bhatt <quic_bbhatt@quicinc.com>
+Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+Link: https://lore.kernel.org/r/1650302327-30439-1-git-send-email-quic_jhugo@quicinc.com
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ Documentation/ABI/stable/sysfs-bus-mhi | 10 ++++++++++
+ drivers/bus/mhi/host/init.c            | 14 ++++++++++++++
+ 2 files changed, 24 insertions(+)
+
+--- a/Documentation/ABI/stable/sysfs-bus-mhi
++++ b/Documentation/ABI/stable/sysfs-bus-mhi
+@@ -19,3 +19,13 @@ Description:	The file holds the OEM PK H
+ 		read without having the device power on at least once, the file
+ 		will read all 0's.
+ Users:		Any userspace application or clients interested in device info.
++
++What:           /sys/bus/mhi/devices/.../soc_reset
++Date:           April 2022
++KernelVersion:  5.19
++Contact:        mhi@lists.linux.dev
++Description:	Initiates a SoC reset on the MHI controller.  A SoC reset is
++                a reset of last resort, and will require a complete re-init.
++                This can be useful as a method of recovery if the device is
++                non-responsive, or as a means of loading new firmware as a
++                system administration task.
+--- a/drivers/bus/mhi/host/init.c
++++ b/drivers/bus/mhi/host/init.c
+@@ -108,9 +108,23 @@ static ssize_t oem_pk_hash_show(struct d
+ }
+ static DEVICE_ATTR_RO(oem_pk_hash);
+ 
++static ssize_t soc_reset_store(struct device *dev,
++			       struct device_attribute *attr,
++			       const char *buf,
++			       size_t count)
++{
++	struct mhi_device *mhi_dev = to_mhi_device(dev);
++	struct mhi_controller *mhi_cntrl = mhi_dev->mhi_cntrl;
++
++	mhi_soc_reset(mhi_cntrl);
++	return count;
++}
++static DEVICE_ATTR_WO(soc_reset);
++
+ static struct attribute *mhi_dev_attrs[] = {
+ 	&dev_attr_serial_number.attr,
+ 	&dev_attr_oem_pk_hash.attr,
++	&dev_attr_soc_reset.attr,
+ 	NULL,
+ };
+ ATTRIBUTE_GROUPS(mhi_dev);

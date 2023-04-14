@@ -1,0 +1,42 @@
+From 249369e93121306ccf0e1365fc5b2ecc6c8618ab Mon Sep 17 00:00:00 2001
+From: Wan Jiabing <wanjiabing@vivo.com>
+Date: Tue, 26 Apr 2022 20:58:59 +0800
+Subject: [PATCH] bus: mhi: replace snprintf with sysfs_emit
+
+Fix following coccicheck warning:
+./drivers/bus/mhi/host/init.c:89:8-16: WARNING: use scnprintf or sprintf
+
+Use sysfs_emit and sysfs_emit_at instead of snprintf.
+
+Reviewed-by: Kees Cook <keescook@chromium.org>
+Reviewed-by: Manivannan Sadhasivam <mani@kernel.org>
+Signed-off-by: Wan Jiabing <wanjiabing@vivo.com>
+Link: https://lore.kernel.org/r/20220426125902.681258-1-wanjiabing@vivo.com
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/bus/mhi/host/init.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+--- a/drivers/bus/mhi/host/init.c
++++ b/drivers/bus/mhi/host/init.c
+@@ -86,7 +86,7 @@ static ssize_t serial_number_show(struct
+ 	struct mhi_device *mhi_dev = to_mhi_device(dev);
+ 	struct mhi_controller *mhi_cntrl = mhi_dev->mhi_cntrl;
+ 
+-	return snprintf(buf, PAGE_SIZE, "Serial Number: %u\n",
++	return sysfs_emit(buf, "Serial Number: %u\n",
+ 			mhi_cntrl->serial_number);
+ }
+ static DEVICE_ATTR_RO(serial_number);
+@@ -100,9 +100,8 @@ static ssize_t oem_pk_hash_show(struct d
+ 	int i, cnt = 0;
+ 
+ 	for (i = 0; i < ARRAY_SIZE(mhi_cntrl->oem_pk_hash); i++)
+-		cnt += snprintf(buf + cnt, PAGE_SIZE - cnt,
+-				"OEMPKHASH[%d]: 0x%x\n", i,
+-				mhi_cntrl->oem_pk_hash[i]);
++		cnt += sysfs_emit_at(buf, cnt, "OEMPKHASH[%d]: 0x%x\n",
++				i, mhi_cntrl->oem_pk_hash[i]);
+ 
+ 	return cnt;
+ }

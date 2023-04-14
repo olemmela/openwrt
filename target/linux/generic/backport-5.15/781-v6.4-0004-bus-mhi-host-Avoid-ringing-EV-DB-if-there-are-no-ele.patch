@@ -1,0 +1,46 @@
+From 4308c6878acfb58eda46483644b516abd732b6dd Mon Sep 17 00:00:00 2001
+From: Vivek Pernamitta <quic_vpernami@quicinc.com>
+Date: Tue, 4 Apr 2023 15:14:16 +0530
+Subject: [PATCH 4/6] bus: mhi: host: Avoid ringing EV DB if there are no
+ elements to process
+
+Currently, mhi_process_data_event_ring()/mhi_process_ctrl_ev_ring() APIs
+are ringing DB even if there are no ring elements to process. This could
+cause the device to process the DB event in the absence of ring elements.
+So to avoid this unnecessary device processing, let's ring event DB only
+if there are any ring elements to process.
+
+Signed-off-by: Vivek Pernamitta <quic_vpernami@quicinc.com>
+Reviewed-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+Link: https://lore.kernel.org/r/1680601458-9105-1-git-send-email-quic_vpernami@quicinc.com
+[mani: massaged the commit message a bit]
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/bus/mhi/host/main.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+--- a/drivers/bus/mhi/host/main.c
++++ b/drivers/bus/mhi/host/main.c
+@@ -961,7 +961,9 @@ int mhi_process_ctrl_ev_ring(struct mhi_
+ 	}
+ 
+ 	read_lock_bh(&mhi_cntrl->pm_lock);
+-	if (likely(MHI_DB_ACCESS_VALID(mhi_cntrl)))
++
++	/* Ring EV DB only if there is any pending element to process */
++	if (likely(MHI_DB_ACCESS_VALID(mhi_cntrl)) && count)
+ 		mhi_ring_er_db(mhi_event);
+ 	read_unlock_bh(&mhi_cntrl->pm_lock);
+ 
+@@ -1031,7 +1033,9 @@ int mhi_process_data_event_ring(struct m
+ 		count++;
+ 	}
+ 	read_lock_bh(&mhi_cntrl->pm_lock);
+-	if (likely(MHI_DB_ACCESS_VALID(mhi_cntrl)))
++
++	/* Ring EV DB only if there is any pending element to process */
++	if (likely(MHI_DB_ACCESS_VALID(mhi_cntrl)) && count)
+ 		mhi_ring_er_db(mhi_event);
+ 	read_unlock_bh(&mhi_cntrl->pm_lock);
+ 

@@ -1,0 +1,37 @@
+From 446271e5d7bcb5f1c70bc35b11abbd92e6bb4378 Mon Sep 17 00:00:00 2001
+From: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Date: Fri, 24 Mar 2023 10:21:00 -0600
+Subject: [PATCH 2/6] bus: mhi: host: Use ERANGE for BHIOFF/BHIEOFF range check
+
+If the BHIOFF or BHIEOFF range checks fail, they return EINVAL.  ERANGE
+is a better error code since it implies an out of range condition.
+
+Suggested-by: Manivannan Sadhasivam <mani@kernel.org>
+Signed-off-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
+Reviewed-by: Manivannan Sadhasivam <mani@kernel.org>
+Link: https://lore.kernel.org/r/1679674860-28229-1-git-send-email-quic_jhugo@quicinc.com
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/bus/mhi/host/init.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/drivers/bus/mhi/host/init.c
++++ b/drivers/bus/mhi/host/init.c
+@@ -1112,7 +1112,7 @@ int mhi_prepare_for_power_up(struct mhi_
+ 	if (bhi_off >= mhi_cntrl->reg_len) {
+ 		dev_err(dev, "BHI offset: 0x%x is out of range: 0x%zx\n",
+ 			bhi_off, mhi_cntrl->reg_len);
+-		ret = -EINVAL;
++		ret = -ERANGE;
+ 		goto error_reg_offset;
+ 	}
+ 	mhi_cntrl->bhi = mhi_cntrl->regs + bhi_off;
+@@ -1129,7 +1129,7 @@ int mhi_prepare_for_power_up(struct mhi_
+ 			dev_err(dev,
+ 				"BHIe offset: 0x%x is out of range: 0x%zx\n",
+ 				bhie_off, mhi_cntrl->reg_len);
+-			ret = -EINVAL;
++			ret = -ERANGE;
+ 			goto error_reg_offset;
+ 		}
+ 		mhi_cntrl->bhie = mhi_cntrl->regs + bhie_off;
