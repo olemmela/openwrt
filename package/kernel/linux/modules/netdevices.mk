@@ -224,6 +224,22 @@ endef
 $(eval $(call KernelPackage,phylib-broadcom))
 
 
+define KernelPackage/phylib-qcom
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=Qualcomm Ethernet PHY library
+  KCONFIG:=CONFIG_QCOM_NET_PHYLIB
+  DEPENDS:=+kmod-libphy
+  FILES:=$(LINUX_DIR)/drivers/net/phy/qcom/qcom-phy-lib.ko
+  AUTOLOAD:=$(call AutoLoad,17,qcom-phy-lib)
+endef
+
+define KernelPackage/phy-at803x/description
+  Qualcomm Ethernet PHY library
+endef
+
+$(eval $(call KernelPackage,phylib-qcom))
+
+
 define KernelPackage/phy-amd
    SUBMENU:=$(NETWORK_DEVICES_MENU)
    TITLE:=AMD PHY driver
@@ -238,6 +254,22 @@ define KernelPackage/phy-amd/description
 endef
 
 $(eval $(call KernelPackage,phy-amd))
+
+
+define KernelPackage/phy-at803x
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=Qualcomm Atheros 8337 internal PHY
+  KCONFIG:=CONFIG_AT803X_PHY
+  DEPENDS:=+kmod-libphy +kmod-phylib-qcom
+  FILES:=$(LINUX_DIR)/drivers/net/phy/qcom/at803x.ko
+  AUTOLOAD:=$(call AutoLoad,44,at803x,1)
+endef
+
+define KernelPackage/phy-at803x/description
+  Qualcomm Atheros 8337 internal PHY
+endef
+
+$(eval $(call KernelPackage,phy-at803x))
 
 
 define KernelPackage/phy-ax88796b
