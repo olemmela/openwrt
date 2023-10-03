@@ -162,9 +162,12 @@ define Device/tplink_archer-c7-v1
   SOC := qca9558
   DEVICE_MODEL := Archer C7
   DEVICE_VARIANT := v1
-  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ledtrig-usbport
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ledtrig-usbport \
+	kmod-dsa-qca8k -kmod-switch-ip17xx -kmod-switch-ar8xxx -swconfig -kmod-swconfig
   TPLINK_HWID := 0x75000001
   SUPPORTED_DEVICES += archer-c7
+  DEVICE_COMPAT_VERSION := 1.1
+  DEVICE_COMPAT_MESSAGE := Config cannot be migrated from swconfig to DSA
 endef
 TARGET_DEVICES += tplink_archer-c7-v1
 
@@ -174,9 +177,12 @@ define Device/tplink_archer-c7-v2
   DEVICE_MODEL := Archer C7
   DEVICE_VARIANT := v2
   DEVICE_PACKAGES := kmod-usb2 kmod-usb-ledtrig-usbport kmod-ath10k-ct \
-	ath10k-firmware-qca988x-ct
+	ath10k-firmware-qca988x-ct kmod-dsa-qca8k \
+	-kmod-switch-ip17xx -kmod-switch-ar8xxx -swconfig -kmod-swconfig
   TPLINK_HWID := 0xc7000002
   SUPPORTED_DEVICES += archer-c7
+  DEVICE_COMPAT_VERSION := 1.1
+  DEVICE_COMPAT_MESSAGE := Config cannot be migrated from swconfig to DSA
   IMAGES += factory-us.bin factory-eu.bin
   IMAGE/factory-us.bin := tplink-v1-image factory -C US
   IMAGE/factory-eu.bin := tplink-v1-image factory -C EU
