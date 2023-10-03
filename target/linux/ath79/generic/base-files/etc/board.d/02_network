@@ -182,11 +182,13 @@ ath79_setup_interfaces()
 	belkin,f9k1115-v2|\
 	tplink,archer-c5-v1|\
 	tplink,archer-c7-v1|\
-	tplink,archer-c7-v2|\
 	tplink,tl-wdr4900-v2|\
 	tplink,tl-wdr7500-v3)
 		ucidef_add_switch "switch0" \
 			"0@eth1" "2:lan" "3:lan" "4:lan" "5:lan" "6@eth0" "1:wan"
+		;;
+	tplink,archer-c7-v2)
+		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" "wan"
 		;;
 	buffalo,bhr-4grv|\
 	buffalo,wzr-hp-g450h)

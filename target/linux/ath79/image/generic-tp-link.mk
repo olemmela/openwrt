@@ -174,7 +174,7 @@ define Device/tplink_archer-c7-v2
   DEVICE_MODEL := Archer C7
   DEVICE_VARIANT := v2
   DEVICE_PACKAGES := kmod-usb2 kmod-usb-ledtrig-usbport kmod-ath10k-ct \
-	ath10k-firmware-qca988x-ct
+	ath10k-firmware-qca988x-ct kmod-dsa-qca8k ip-tiny -swconfig
   TPLINK_HWID := 0xc7000002
   SUPPORTED_DEVICES += archer-c7
   IMAGES += factory-us.bin factory-eu.bin
