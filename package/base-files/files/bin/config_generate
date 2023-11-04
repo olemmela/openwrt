@@ -116,15 +116,15 @@ generate_network() {
 			set network.@device[-1].type='bridge'
 		EOF
 		for port in $ports; do uci add_list network.@device[-1].ports="$port"; done
-		[ -n "$macaddr" ] && {
-			for port in $ports; do
-				uci -q batch <<-EOF
-					add network device
-					set network.@device[-1].name='$port'
-					set network.@device[-1].macaddr='$macaddr'
-				EOF
-			done
-		}
+		for port in $ports; do
+			uci -q batch <<-EOF
+				add network device
+				set network.@device[-1].name='$port'
+			EOF
+			[ -n "$macaddr" ] && {
+				uci set network.@device[-1].macaddr="$macaddr";
+			}
+		done
 		device=br-$1
 		type=
 		macaddr=""
@@ -141,12 +141,14 @@ generate_network() {
 		type=""
 	}
 
-	if [ -n "$macaddr" ]; then
+	if [ -z "$ports" ]; then
 		uci -q batch <<-EOF
 			add network device
 			set network.@device[-1].name='$device'
-			set network.@device[-1].macaddr='$macaddr'
 		EOF
+		if [ -n "$macaddr" ]; then
+			uci set network.@device[-1].macaddr='$macaddr'
+		fi
 	fi
 
 	uci -q batch <<-EOF
