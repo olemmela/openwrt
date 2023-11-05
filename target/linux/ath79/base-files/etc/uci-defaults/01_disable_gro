@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+uci set network.device_defaults='device_defaults'
+uci set network.device_defaults.gro='false'
