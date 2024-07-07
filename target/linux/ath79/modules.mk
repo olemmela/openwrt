@@ -22,6 +22,7 @@ define KernelPackage/ag71xx
   SUBMENU:=$(NETWORK_DEVICES_MENU)
   TITLE:=Atheros AR7XXX/AR9XXX built-in ethernet mac support
   KCONFIG:=CONFIG_AG71XX \
+	   CONFIG_AG71XX_DEBUG=n \
 	   CONFIG_AG71XX_DEBUG_FS=y
   FILES:=$(LINUX_DIR)/drivers/net/ethernet/atheros/ag71xx/ag71xx.ko \
 	 $(LINUX_DIR)/drivers/net/ethernet/atheros/ag71xx/ag71xx_mdio.ko

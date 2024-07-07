@@ -233,7 +233,7 @@ define KernelPackage/phylib-qcom
   AUTOLOAD:=$(call AutoLoad,17,qcom-phy-lib)
 endef
 
-define KernelPackage/phy-at803x/description
+define KernelPackage/phylib-qcom/description
   Qualcomm Ethernet PHY library
 endef
 
@@ -262,7 +262,7 @@ define KernelPackage/phy-at803x
   KCONFIG:=CONFIG_AT803X_PHY
   DEPENDS:=+kmod-libphy +kmod-phylib-qcom
   FILES:=$(LINUX_DIR)/drivers/net/phy/qcom/at803x.ko
-  AUTOLOAD:=$(call AutoLoad,44,at803x,1)
+  AUTOLOAD:=$(call AutoLoad,18,at803x,1)
 endef
 
 define KernelPackage/phy-at803x/description
