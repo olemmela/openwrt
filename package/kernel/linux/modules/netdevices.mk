@@ -321,6 +321,20 @@ endef
 
 $(eval $(call KernelPackage,phy-bcm84881))
 
+define KernelPackage/phy-qca83xx
+   SUBMENU:=$(NETWORK_DEVICES_MENU)
+   TITLE:=Qualcomm Atheros QCA833x PHY driver
+   KCONFIG:=CONFIG_QCA83XX_PHY
+   DEPENDS:=+kmod-libphy +kmod-phylib-qcom
+   FILES:=$(LINUX_DIR)/drivers/net/phy/qcom/qca83xx.ko
+   AUTOLOAD:=$(call AutoLoad,18,qca83xx,1)
+endef
+
+define KernelPackage/phy-qca83xx/description
+   Supports the Qualcomm Atheros QCA833x PHYs.
+endef
+
+$(eval $(call KernelPackage,phy-qca83xx))
 
 define KernelPackage/phy-marvell
    SUBMENU:=$(NETWORK_DEVICES_MENU)
