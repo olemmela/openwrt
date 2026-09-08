@@ -27,6 +27,7 @@ MAGIC = 0x27051956
 BOARD_HOSTS = {
     "hasivo_f1100w-4sx-4xgt": "F1100W-4SX-4XGT",
     "hasivo_f1100w-4sx-4xgt-512mb": "F1100W-4SX-4XGT",
+    "hasivo_s1100wp-8gt-2s-plus": "S1100WP-8GT-2S+",
 }
 APPLET_CONFIG = (
     "ASH", "ASH_ECHO", "ASH_PRINTF", "ASH_TEST", "FEATURE_MD5_SHA1_SUM_CHECK",
